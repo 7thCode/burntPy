@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+uwsgi = "*"
+sympy = "*"
+
+[dev-packages]
+cython = "*"
+
+[requires]
+python_version = "3.9"
+
+[scripts]
+compile="cythonize -i fibmodule.pyx"
+start="uwsgi uwsgi.ini"
+stop="uwsgi --stop uwsgi.pid"
+restart="uwsgi --restart uwsgi.pid"
