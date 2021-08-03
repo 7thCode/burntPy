@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
 
 from sympy import *
-from sympy.abc import *
-
 
 app = Flask(__name__, static_folder='./public', static_url_path='')
 
