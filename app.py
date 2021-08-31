@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
 
 import io
+import json
+from json import JSONDecodeError
+import urllib.parse
 
 from flask import Flask, Response, request
 
@@ -10,9 +13,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_svg import FigureCanvasSVG
 
 from matplotlib.font_manager import FontProperties
-fp = FontProperties(fname=r'/Users/oda/project/pycharm/burntPy/public/fonts/NotoSansJP-Regular.otf', size=12)
+fp = FontProperties(fname=r'public/fonts/NotoSansJP-Regular.otf', size=12)
 
-import numpy as np
 from numpy import ma
 
 from sympy import *
@@ -57,13 +59,23 @@ def to_png(fig):
     return output.getvalue()
 
 
+
 @app.route("/ex1.svg")
 def ex1():
-    fig, ax = plt.subplots()  # Create a figure containing a single axes.
-    ax.plot([1, 2, 3, 4], [1, 4, 2, 3])  # Plot some data on the axes.
+    data_string = request.args.get('data')
+    unquoted_data_string2 = urllib.parse.unquote(data_string)
+
+    fig, ax = plt.subplots()
+    if unquoted_data_string2:
+        try:
+            data = json.loads(unquoted_data_string2)
+            ax.plot(data['x'], data['y'])
+        except JSONDecodeError as e:
+            return Response("<div>JSONDecodeError</div>", mimetype="text/html")
+        except AttributeError as e:
+            return Response("<div>AttributeError</div>", mimetype="text/html")
 
     return Response(to_svg(fig), mimetype="image/svg+xml")
-
 
 @app.route("/ex2.svg")
 def ex2():
@@ -214,6 +226,29 @@ def histogram_svg():
     axes[2].set_title("2d histogram and linear color scale")
 
     toc = time.time()
+
+    return Response(to_svg(fig), mimetype="image/svg+xml")
+
+
+@app.route("/ex1s.svg")
+def ex1s():
+    data_string = request.args.get('data')
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel('X軸　ラベル', fontproperties=fp)
+    ax.set_ylabel('Y軸　ラベル', fontproperties=fp)
+    ax.set_title("タイトル", fontproperties=fp)
+
+    if data_string:
+        unquoted_data_string = urllib.parse.unquote(data_string)
+        try:
+            data = json.loads(unquoted_data_string)
+            x = [i for i in range(len(data))]
+            ax.plot(x, data, label='データ')
+        except Exception as e:
+            return Response("<div>" + e.msg + "</div>", mimetype="text/html")
+
+    ax.legend(['データ'], prop=fp)
 
     return Response(to_svg(fig), mimetype="image/svg+xml")
 
