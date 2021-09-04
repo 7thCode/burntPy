@@ -59,7 +59,16 @@ def to_png(fig):
     return output.getvalue()
 
 
+# First
+@app.route("/ex0.svg")
+def ex0():
+    figure, axis = plt.subplots()
+    axis.plot([0,1,2,3], [0,20,40,60])
+#    plt.show()
+    return Response(to_svg(figure), mimetype="image/svg+xml")
 
+
+# with Param
 @app.route("/ex1.svg")
 def ex1():
     data_string = request.args.get('data')
@@ -77,6 +86,8 @@ def ex1():
 
     return Response(to_svg(fig), mimetype="image/svg+xml")
 
+
+# Full Element
 @app.route("/ex2.svg")
 def ex2():
     x = np.linspace(0, 2, 100)
@@ -93,6 +104,7 @@ def ex2():
     return Response(to_svg(fig), mimetype="image/svg+xml")
 
 
+# Full Element 漢字
 @app.route("/ex2k.svg")
 def ex2k():
     x = np.linspace(0, 2, 100)
@@ -109,6 +121,7 @@ def ex2k():
     return Response(to_svg(fig), mimetype="image/svg+xml")
 
 
+# Multi
 @app.route("/ex3.svg")
 def ex3():
     fig, ax1 = plt.subplots(1, 1)
@@ -118,7 +131,8 @@ def ex3():
     return Response(to_svg(fig), mimetype="image/svg+xml")
 
 
-@app.route("/llinspace.png")
+# Line
+@app.route("/linspace.png")
 def llinspace_png():
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.plot([0, 1], [0, 1], label="Line", path_effects=[patheffects.withTickedStroke(spacing=7, angle=135)])
@@ -133,6 +147,7 @@ def llinspace_png():
     return Response(to_png(fig), mimetype="image/png")
 
 
+#
 @app.route("/barchart.svg")
 def barchart_svg():
     labels = ['G1', 'G2', 'G3', 'G4', 'G5']
@@ -252,6 +267,45 @@ def ex1s():
 
     return Response(to_svg(fig), mimetype="image/svg+xml")
 
+
+@app.route("/mplot3d.svg")
+def mplot3d():
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib import cm
+    from mpl_toolkits.mplot3d import Axes3D
+
+    X = np.arange(-5, 5, 0.25)
+    Y = np.arange(-5, 5, 0.25)
+    X, Y = np.meshgrid(X, Y)
+    R = np.sqrt(X**2 + Y**2)
+    Z = np.sin(R)
+
+    fig = plt.figure()
+    ax = Axes3D(fig, auto_add_to_figure=False)
+    fig.add_axes(ax)
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.viridis)
+
+    return Response(to_svg(fig), mimetype="image/svg+xml")
+
+@app.route("/oneshot.svg")
+def oneshot():
+    import numpy as np
+    np.random.seed(19680801)
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    for color in ['tab:blue', 'tab:orange', 'tab:green']:
+        n = 750
+        x, y = np.random.rand(2, n)
+        scale = 200.0 * np.random.rand(n)
+        ax.scatter(x, y, c=color, s=scale, label=color,alpha=0.3, edgecolors='none')
+
+    ax.legend()
+    ax.grid(True)
+
+    return Response(to_svg(fig), mimetype="image/svg+xml")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
